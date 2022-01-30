@@ -1,0 +1,31 @@
+{
+  "name": "starnet-gui",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "concurrently -k \"vite\" \"tauri dev\"",
+    "build": "vue-tsc --noEmit && vite build && tauri build"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.0.0-beta.8",
+    "@vueuse/core": "^6.9.1",
+    "pinia": "^2.0.3",
+    "vue": "^3.2.16",
+    "vue-router": "^4.0.12"
+  },
+  "devDependencies": {
+    "@iconify/json": "^1.1.428",
+    "@tauri-apps/cli": "^1.0.0-beta.10",
+    "@vitejs/plugin-vue": "^1.9.3",
+    "concurrently": "^6.3.0",
+    "naive-ui": "^2.24.7",
+    "typescript": "^4.4.3",
+    "unplugin-auto-import": "^0.4.14",
+    "unplugin-icons": "^0.12.18",
+    "unplugin-vue-components": "^0.17.2",
+    "vite": "^2.6.4",
+    "vite-plugin-windicss": "^1.5.1",
+    "vue-devtools": "^5.1.4",
+    "vue-tsc": "^0.3.0",
+    "windicss": "^3.2.1"
+  }
+}
