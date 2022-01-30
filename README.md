@@ -1,3 +1,3 @@
-# Vue 3 + Typescript + Vite + Tauri
+# GUI for StarNet (V1)
 
-<p>Template for Tauri with Vue and Vite.</p>
+<p>Will update for V2 when the CLI version is out.</p>
