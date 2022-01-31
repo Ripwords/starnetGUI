@@ -33,7 +33,7 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
   try {
     await copyFile(inputPath, `${store.starnetPath}/input.tiff`)
   } catch(e) {
-    message.error('No Image Path provided')
+    message.error('Image Path Error')
     return
   }
 
@@ -66,6 +66,11 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
   })
   command.on('close', () => {
     if (mode.value != '') {
+      if (stdOut.value.endsWith('errors!\n')) {
+        loading.error()
+        message.error('Starnet Error')
+        return
+      }
       loading.finish()
       done.value = true
       message.success('StarNet finished!')
@@ -103,12 +108,23 @@ const browse = async (path: string) => {
   if (path == 'starnet') {
     store.starnetPath = (await open({ directory: true })).toString()
   } else if (path == 'input'){
-    const file = (await open()).toString()
-    if (input.value.indexOf(file) == -1) {
-      input.value.push(file)
-    }
+    const openDialog = await open({
+      multiple: true,
+      filters: [
+        { name: 'TIFF', extensions: ['tiff', 'tif'] }
+      ]
+    })
+    const file = (openDialog == null ? [] : [...openDialog])
+    file.forEach((f: string) => {
+      if (input.value.indexOf(f) == -1) {
+        input.value.push(f)
+      }
+    })
   } else if (path == 'output') {
-    output.value = (await open({ directory: true })).toString()
+    const openDialog = await open({
+      directory: true
+    })
+    output.value = (openDialog == null ? '' : openDialog.toString())
   }
 }
 
@@ -124,6 +140,10 @@ const clear = async () => {
 const starnetInit = async (type: string) => {
   const length = input.value.length
   const arr = [...input.value]
+  if (arr.length == 0) {
+    message.error('No image selected!')
+    return
+  }
   for (let i = 0; i < length; i++) {
     output.value == '' ? output.value = await dirname(arr[i]) : output.value
     await starnet(type, arr[i], i+1, output.value)
@@ -163,7 +183,14 @@ await listen('tauri://close-requested', async () => {
         <n-card title="Input Image">
           <n-button @click="browse('input')">Browse</n-button>
           <div v-show="input.length != 0">
-            <n-card v-for="img in input" :key="img">{{ img }}<button class="absolute right-1 top-4.5 mr-5" @click="input = input.filter(e => e !== img)">x</button></n-card>
+            <n-card class="break-words" v-for="img in input" :key="img">
+              <div class="flex justify-between">
+                <div class="max-w-[90%] relative">
+                  {{ img }}
+                </div>
+                <button @click="input = input.filter(e => e !== img)">x</button>
+              </div>
+            </n-card>
           </div>
         </n-card>
       </div>
