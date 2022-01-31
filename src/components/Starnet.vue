@@ -44,13 +44,13 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
   if (!outputPath) {
     outputPath = await dirname(inputPath)
   }
-
+  counter > 1 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
   // Construct Command
   const command = new Command(
     `${store.starnetPath}\\${type}_starnet++.exe`, 
     [
       'input.tiff', 
-      `${outputPath}\\${store.outputFilename}_${counter}.tiff`, 
+      outputPath, 
       stride.value ? '128' : '256'
     ], 
     {
@@ -148,7 +148,7 @@ const starnetInit = async (type: string) => {
   }
   for (let i = 0; i < length; i++) {
     output.value == '' ? output.value = await dirname(arr[i]) : output.value
-    await starnet(type, arr[i], i+1, output.value)
+    await starnet(type, arr[i], i, output.value)
     input.value.shift()
   }
   output.value = ''
