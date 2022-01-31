@@ -1,4 +1,4 @@
-# GUI for StarNet (V1.1)
+# StarNet++ GUI
 
 <p>Will update for V2 when the CLI version is out.</p>
 
@@ -8,6 +8,14 @@
 1. Multi-File Drag and Drop support
 2. File filtering ( allows only .tif and .tiff files )
 3. Easy output file naming
+
+---
+
+## TODO
+1. Update Icon
+2. Create auto updater
+3. UI touchups 
+4. Full application testing
 
 ---
 
