@@ -155,7 +155,7 @@ const starnetInit = async (type: string) => {
 // Tauri Event listeners
 await listen('tauri://file-drop', (file: any) => {
   file.payload.forEach((f: any) => {
-    if (input.value.indexOf(f) == -1) {
+    if (input.value.indexOf(f) == -1 && (f.endsWith('.tiff') || f.endsWith('.tif'))) {
       input.value.push(f)
     }
   })
