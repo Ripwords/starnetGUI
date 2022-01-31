@@ -8,22 +8,20 @@ import { useLoadingBar, useMessage } from 'naive-ui'
 import { mainStore } from '../store'
 
 const store = mainStore()
-
 const message = useMessage()
 const loading = useLoadingBar()
-
-const input = ref('')
+const input = ref<string[]>([])
 const output = ref('')
-
 const stdOut = ref('')
 const stride = ref()
 const mode = ref('')
 const done = ref(false)
 
 // StarNet Function
-const starnet = async (type: string, inputPath: string, outputPath?: string) => {
+const starnet = async (type: string, inputPath: string, counter: number, outputPath?: string) => {
   // Clear the output
   stdOut.value = ''
+  done.value = false
 
   // Check for StarNet path
   if (store.starnetPath == '') {
@@ -39,7 +37,7 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
     return
   }
 
-  // Set the image type (RGB/M)
+  // Set the image type (RGB/Mono)
   mode.value = type
 
   // Set the image output path
@@ -52,7 +50,7 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
     `${store.starnetPath}\\${type}_starnet++.exe`, 
     [
       'input.tiff', 
-      `${outputPath}\\${store.outputFilename}.tiff`, 
+      `${outputPath}\\${store.outputFilename}_${counter}.tiff`, 
       stride.value ? '128' : '256'
     ], 
     {
@@ -61,11 +59,20 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
   )
 
   // Get stdout and listen to events
-  command.on('error', () => loading.error())
+  command.on('error', () => {
+    loading.error()
+    message.error('Starnet Error')
+    return
+  })
   command.on('close', () => {
-    loading.finish()
-    done.value = true
-    message.success('StarNet finished!')
+    if (mode.value != '') {
+      loading.finish()
+      done.value = true
+      message.success('StarNet finished!')
+    } else {
+      loading.error()
+      message.error('StarNet Aborted!')
+    }
   })
   command.stdout.on('data', (line: string) => {
     line.endsWith('finished\r') ? stdOut.value += '' : stdOut.value += `${line}\n`
@@ -74,11 +81,11 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
   // Run StarNet
   try {
     loading.start()
+    message.info('Running StarNet...')
     await command.execute()
   } catch(e) {
     loading.error()
-    message.error("StarNet not found")    
-    mode.value = ''
+    message.error("StarNet not found!")    
     await removeFile(`${store.starnetPath}/input.tiff`)
     return
   }
@@ -86,32 +93,52 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
 
 // Kills and abort StarNet operation
 const killStarnet = async (type: string) => {
+  await clear()
   const kill = new Command('taskkill', ['/f', '/im', `${type}_starnet++.exe`])
   kill.execute()
-  stdOut.value = ''
-  mode.value = ''
-  await removeFile(`${store.starnetPath}/input.tiff`)
 }
 
 // Open directories/files
 const browse = async (path: string) => {
   if (path == 'starnet') {
     store.starnetPath = (await open({ directory: true })).toString()
-  } else {
-    path == 'input' ? input.value = (await open()).toString() : output.value = (await open({ directory: true })).toString()
+  } else if (path == 'input'){
+    const file = (await open()).toString()
+    if (input.value.indexOf(file) == -1) {
+      input.value.push(file)
+    }
+  } else if (path == 'output') {
+    output.value = (await open({ directory: true })).toString()
   }
 }
 
 // Clear the output and resets the parameters
 const clear = async () => {
-  stdOut.value = ''
   mode.value = ''
+  stdOut.value = ''
   await removeFile(`${store.starnetPath}/input.tiff`)
   done.value = false
 }
 
+// Initialize the StarNet operation
+const starnetInit = async (type: string) => {
+  const length = input.value.length
+  const arr = [...input.value]
+  for (let i = 0; i < length; i++) {
+    output.value == '' ? output.value = await dirname(arr[i]) : output.value
+    await starnet(type, arr[i], i+1, output.value)
+    input.value.shift()
+  }
+  output.value = ''
+}
+
+// Tauri Event listeners
 await listen('tauri://file-drop', (file: any) => {
-  input.value = file.payload[0]
+  file.payload.forEach((f: any) => {
+    if (input.value.indexOf(f) == -1) {
+      input.value.push(f)
+    }
+  })
 })
 
 await listen('tauri://close-requested', async () => {
@@ -135,7 +162,9 @@ await listen('tauri://close-requested', async () => {
       <div class="mx-5 mb-5" v-show="store.starnetPath != ''">
         <n-card title="Input Image">
           <n-button @click="browse('input')">Browse</n-button>
-          <n-card v-show="input != ''">{{ input }}</n-card>
+          <div v-show="input.length != 0">
+            <n-card v-for="img in input" :key="img">{{ img }}<button class="absolute right-1 top-4.5 mr-5" @click="input = input.filter(e => e !== img)">x</button></n-card>
+          </div>
         </n-card>
       </div>
     </n-collapse-item>
@@ -158,8 +187,8 @@ await listen('tauri://close-requested', async () => {
     <n-collapse-item title="StarNet++" name="4">
       <div class="mx-5 mb-5" v-show="store.starnetPath != ''">
         <n-card title="StarNet++">
-          <n-button @click="starnet('rgb', input, output)">StarNet RGB</n-button>
-          <n-button @click="starnet('mono', input, output)">StarNet Mono</n-button>
+          <n-button @click="starnetInit('rgb')">StarNet RGB</n-button>
+          <n-button @click="starnetInit('mono')">StarNet Mono</n-button>
           <n-button v-show="mode != '' && !done" @click="killStarnet(mode)">Stop</n-button>
           <n-button v-show="done" @click="clear">Done</n-button>
           <div class="my-3">
