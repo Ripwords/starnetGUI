@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { open } from '@tauri-apps/api/dialog'
+import { platform } from '@tauri-apps/api/os'
 import { dirname } from '@tauri-apps/api/path'
 import { listen } from '@tauri-apps/api/event'
 import { Command } from '@tauri-apps/api/shell'
@@ -16,6 +17,7 @@ const stdOut = ref('')
 const stride = ref()
 const mode = ref('')
 const done = ref(false)
+const os = await platform()
 
 // StarNet Function
 const starnet = async (type: string, inputPath: string, counter: number, outputPath?: string) => {
@@ -46,8 +48,9 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
   }
   counter > 1 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
   // Construct Command
+  const starnetCommand = os == 'win32' ? `${store.starnetPath}\\${type}_starnet++` : `./${store.starnetPath}\\${type}_starnet++`
   const command = new Command(
-    `${store.starnetPath}\\${type}_starnet++`, 
+    starnetCommand, 
     [
       'input.tiff', 
       outputPath, 
