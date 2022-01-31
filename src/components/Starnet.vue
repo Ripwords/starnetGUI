@@ -118,6 +118,8 @@ const browse = async (path: string) => {
     file.forEach((f: string) => {
       if (input.value.indexOf(f) == -1) {
         input.value.push(f)
+      } else {
+        message.error('Image already added!')
       }
     })
   } else if (path == 'output') {
@@ -157,6 +159,10 @@ await listen('tauri://file-drop', (file: any) => {
   file.payload.forEach((f: any) => {
     if (input.value.indexOf(f) == -1 && (f.endsWith('.tiff') || f.endsWith('.tif'))) {
       input.value.push(f)
+    } else if (input.value.indexOf(f) != -1) {
+      message.error('Image already added!')
+    } else if (!(f.endsWith('.tiff') || f.endsWith('.tif'))) {
+      message.error('Invalid File Type!')
     }
   })
 })
