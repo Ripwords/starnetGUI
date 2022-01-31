@@ -11,6 +11,14 @@
 
 ---
 
+## TODO
+1. Update Icon
+2. Create auto updater
+3. UI touchups 
+4. Full application testing
+
+---
+
 <br>
 
 ![image](https://user-images.githubusercontent.com/58784686/151712593-32123dd9-134f-4334-af4f-3c291b5d5c56.png)
