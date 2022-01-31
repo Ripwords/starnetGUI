@@ -48,7 +48,7 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
   }
   counter > 1 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
   // Construct Command
-  const starnetCommand = os == 'win32' ? `${store.starnetPath}\\${type}_starnet++` : `./${store.starnetPath}\\${type}_starnet++`
+  const starnetCommand = os == 'windows' ? `${store.starnetPath}\\${type}_starnet++` : `./${store.starnetPath}\\${type}_starnet++`
   const command = new Command(
     starnetCommand, 
     [
