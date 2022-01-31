@@ -1,10 +1,10 @@
 [package]
 name = "app"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+version = "0.2.0"
+description = "GUI for StarNet"
+authors = ["Ripwords"]
 license = ""
-repository = ""
+repository = "https://github.com/Ripwords/starnetGUI"
 default-run = "app"
 edition = "2018"
 build = "src/build.rs"

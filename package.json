@@ -1,6 +1,6 @@
 {
   "name": "starnet-gui",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "scripts": {
     "dev": "concurrently -k \"vite\" \"tauri dev\"",
     "build": "vue-tsc --noEmit && vite build && tauri build"
