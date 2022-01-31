@@ -1,24 +1,31 @@
 <script lang="ts" setup>
-import { Command } from '@tauri-apps/api/shell'
 import { open } from '@tauri-apps/api/dialog'
-import { copyFile, removeFile } from '@tauri-apps/api/fs'
 import { dirname } from '@tauri-apps/api/path'
+import { listen } from '@tauri-apps/api/event'
+import { Command } from '@tauri-apps/api/shell'
+import { copyFile, removeFile } from '@tauri-apps/api/fs'
 import { useLoadingBar, useMessage } from 'naive-ui'
 import { mainStore } from '../store'
 
 const store = mainStore()
+
 const message = useMessage()
 const loading = useLoadingBar()
+
 const input = ref('')
 const output = ref('')
+
 const stdOut = ref('')
 const stride = ref()
 const mode = ref('')
 const done = ref(false)
 
+// StarNet Function
 const starnet = async (type: string, inputPath: string, outputPath?: string) => {
+  // Clear the output
   stdOut.value = ''
 
+  // Check for StarNet path
   if (store.starnetPath == '') {
     message.error('Starnet path is not set')
     return
@@ -31,9 +38,11 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
     message.error('No Image Path provided')
     return
   }
+
+  // Set the image type (RGB/M)
   mode.value = type
 
-  // Run StarNet
+  // Set the image output path
   if (!outputPath) {
     outputPath = await dirname(inputPath)
   }
@@ -51,7 +60,7 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
     }
   )
 
-  // Get stdout
+  // Get stdout and listen to events
   command.on('error', () => loading.error())
   command.on('close', () => {
     loading.finish()
@@ -62,6 +71,7 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
     line.endsWith('finished\r') ? stdOut.value += '' : stdOut.value += `${line}\n`
   })
 
+  // Run StarNet
   try {
     loading.start()
     await command.execute()
@@ -74,6 +84,7 @@ const starnet = async (type: string, inputPath: string, outputPath?: string) => 
   }
 }
 
+// Kills and abort StarNet operation
 const killStarnet = async (type: string) => {
   const kill = new Command('taskkill', ['/f', '/im', `${type}_starnet++.exe`])
   kill.execute()
@@ -82,6 +93,7 @@ const killStarnet = async (type: string) => {
   await removeFile(`${store.starnetPath}/input.tiff`)
 }
 
+// Open directories/files
 const browse = async (path: string) => {
   if (path == 'starnet') {
     store.starnetPath = (await open({ directory: true })).toString()
@@ -90,12 +102,21 @@ const browse = async (path: string) => {
   }
 }
 
+// Clear the output and resets the parameters
 const clear = async () => {
   stdOut.value = ''
   mode.value = ''
   await removeFile(`${store.starnetPath}/input.tiff`)
   done.value = false
 }
+
+await listen('tauri://file-drop', (file: any) => {
+  input.value = file.payload[0]
+})
+
+await listen('tauri://close-requested', async () => {
+  await killStarnet(mode.value)
+})
 </script>
 
 <template>
