@@ -88,7 +88,7 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
     }
   })
   command.stdout.on('data', (line: string) => {
-    line.endsWith('finished\r') ? stdOut.value += '' : stdOut.value += `${line}\n`
+    (line.endsWith('finished\r') || line.endsWith('finished')) ? stdOut.value += '' : stdOut.value += `${line}\n`
   })
 
   // Run StarNet
