@@ -46,11 +46,14 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
   if (!outputPath) {
     outputPath = await dirname(inputPath)
   }
+
+  // Check for Platform and set output path
   if (os == "windows") {
     counter > 1 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
   } else {
     counter > 1 ? outputPath = `${outputPath}/${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
   }
+  
   // Construct Command
   const cwd = os == "windows" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
   const starnetCommand = os == 'windows' ? `${store.starnetPath}\\${type}_starnet++` : `${store.starnetPath}/${type}_starnet++`
