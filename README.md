@@ -8,14 +8,14 @@
 1. Multi-File Drag and Drop support
 2. File filtering ( allows only .tif and .tiff files )
 3. Easy output file naming
+4. Auto Updater
 
 ---
 
 ## TODO
-1. Update Icon
-2. Create auto updater
-3. UI touchups 
-4. Full application testing
+1. Update Icon on Github README
+2. UI touchups 
+3. Test for application edge cases
 
 ---
 
