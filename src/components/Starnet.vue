@@ -20,7 +20,12 @@ const done = ref(false)
 const os = await platform()
 
 // StarNet Function
-const starnet = async (type: string, inputPath: string, counter: number, outputPath?: string) => {
+const starnet = async (
+  type: string, 
+  inputPath: string, 
+  counter: number, 
+  outputPath?: string
+) => {
   // Clear the output
   stdOut.value = ''
   done.value = false
@@ -53,7 +58,7 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
   } else {
     counter > 1 ? outputPath = `${outputPath}/${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
   }
-  
+
   // Construct Command
   const cwd = os == "windows" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
   const starnetCommand = os == 'windows' ? `${store.starnetPath}\\${type}_starnet++` : `${store.starnetPath}/${type}_starnet++`
