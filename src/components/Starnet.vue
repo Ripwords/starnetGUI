@@ -46,9 +46,14 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
   if (!outputPath) {
     outputPath = await dirname(inputPath)
   }
-  counter > 1 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
+  if (os == "windows") {
+    counter > 1 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
+  } else {
+    counter > 1 ? outputPath = `${outputPath}/${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
+  }
   // Construct Command
-  const starnetCommand = os == 'windows' ? `${store.starnetPath}\\${type}_starnet++` : `./${store.starnetPath}\\${type}_starnet++`
+  const cwd = os == "windows" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
+  const starnetCommand = os == 'windows' ? `${store.starnetPath}\\${type}_starnet++` : `${store.starnetPath}/${type}_starnet++`
   const command = new Command(
     starnetCommand, 
     [
@@ -57,7 +62,7 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
       stride.value ? '128' : '256'
     ], 
     {
-      cwd: `${store.starnetPath}\\`
+      cwd: cwd
     }
   )
 
@@ -102,7 +107,12 @@ const starnet = async (type: string, inputPath: string, counter: number, outputP
 // Kills and abort StarNet operation
 const killStarnet = async (type: string) => {
   await clear()
-  const kill = new Command('taskkill', ['/f', '/im', `${type}_starnet++.exe`])
+  let kill
+  if (os == "windows") {
+    kill = new Command('taskkill', ['/f', '/im', `${type}_starnet++.exe`])
+  } else {
+    kill = new Command('killall', [`${type}_starnet++`])
+  }
   kill.execute()
 }
 
