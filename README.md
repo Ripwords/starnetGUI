@@ -10,6 +10,9 @@
 3. Easy output file naming
 4. Auto Updater
 
+### Demo Video
+https://youtu.be/OutZCpG2h6E
+
 ---
 
 ## TODO
