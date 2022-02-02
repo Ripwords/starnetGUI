@@ -1,11 +1,11 @@
 [package]
-name = "app"
-version = "0.4.4"
+name = "starnet-gui"
+version = "0.5.0"
 description = "GUI for StarNet"
 authors = ["Ripwords"]
 license = ""
 repository = "https://github.com/Ripwords/starnetGUI"
-default-run = "app"
+default-run = "starnet-gui"
 edition = "2018"
 build = "src/build.rs"
 
