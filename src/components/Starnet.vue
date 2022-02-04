@@ -38,8 +38,10 @@ const starnet = async (
 
   // Copy Input Image to StarNet directory
   try {
-    await copyFile(inputPath, `${store.starnetPath}/input.tiff`)
-  } catch(e) {
+    if (!inputPath.endsWith('input.tiff')) {
+      await copyFile(inputPath, `${store.starnetPath}/input.tiff`)
+    }
+  } catch(e: any) {
     message.error('Image Path Error')
     return
   }
@@ -96,7 +98,7 @@ const starnet = async (
     }
   })
   command.stdout.on('data', (line: string) => {
-    (line.endsWith('finished\r') || line.endsWith('finished')) ? stdOut.value += '' : stdOut.value += `${line}\n`
+    (line.endsWith('finished\r') || line.endsWith('finished')) ? stdOut.value += `${line.slice(0, line.length-2)}\n` : stdOut.value += `${line}\n`
   })
 
   // Run StarNet
