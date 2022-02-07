@@ -17,11 +17,12 @@ const stdOut = ref('')
 const stride = ref()
 const mode = ref('')
 const done = ref(false)
+const customStride = ref(false)
+const customStrideValue = ref()
 const os = await platform()
 
 // StarNet Function
 const starnet = async (
-  type: string, 
   inputPath: string, 
   counter: number, 
   outputPath?: string
@@ -46,8 +47,7 @@ const starnet = async (
     return
   }
 
-  // Set the image type (RGB/Mono)
-  mode.value = type
+  mode.value = "Running"
 
   // Set the image output path
   if (!outputPath) {
@@ -63,19 +63,19 @@ const starnet = async (
 
   // Construct Command
   const cwd = os == "windows" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
-  const starnetCommand = os == 'windows' ? `${store.starnetPath}\\${type}_starnet++` : `${store.starnetPath}/${type}_starnet++`
+  const starnetCommand = os == 'windows' ? `${store.starnetPath}\\starnet++` : `${store.starnetPath}/starnet++`
   const command = new Command(
     starnetCommand, 
     [
       'input.tiff', 
       outputPath, 
-      stride.value ? '128' : '256'
+      customStride.value ? customStrideValue.value : (stride.value ? '128' : '256')
     ], 
     {
       cwd: cwd
     }
   )
-
+      
   // Get stdout and listen to events
   command.on('error', () => {
     loading.error()
@@ -98,7 +98,7 @@ const starnet = async (
     }
   })
   command.stdout.on('data', (line: string) => {
-    (line.endsWith('finished\r') || line.endsWith('finished')) ? stdOut.value += `${line.slice(0, line.length-2)}\n` : stdOut.value += `${line}\n`
+    (line.endsWith('finished\r') || line.endsWith('finished')) ? stdOut.value += '' : stdOut.value += `${line}\n`
   })
 
   // Run StarNet
@@ -115,13 +115,13 @@ const starnet = async (
 }
 
 // Kills and abort StarNet operation
-const killStarnet = async (type: string) => {
+const killStarnet = async () => {
   await clear()
   let kill
   if (os == "windows") {
-    kill = new Command('taskkill', ['/f', '/im', `${type}_starnet++.exe`])
+    kill = new Command('taskkill', ['/f', '/im', `starnet++.exe`])
   } else {
-    kill = new Command('killall', [`${type}_starnet++`])
+    kill = new Command('killall', [`starnet++`])
   }
   kill.execute()
 }
@@ -162,7 +162,7 @@ const clear = async () => {
 }
 
 // Initialize the StarNet operation
-const starnetInit = async (type: string) => {
+const starnetInit = async () => {
   const length = input.value.length
   const arr = [...input.value]
   if (arr.length == 0) {
@@ -171,7 +171,7 @@ const starnetInit = async (type: string) => {
   }
   for (let i = 0; i < length; i++) {
     output.value == '' ? output.value = await dirname(arr[i]) : output.value
-    await starnet(type, arr[i], i, output.value)
+    await starnet(arr[i], i, output.value)
     input.value.shift()
   }
   output.value = ''
@@ -191,7 +191,7 @@ await listen('tauri://file-drop', (file: any) => {
 })
 
 await listen('tauri://close-requested', async () => {
-  await killStarnet(mode.value)
+  await killStarnet()
 })
 </script>
 
@@ -243,12 +243,15 @@ await listen('tauri://close-requested', async () => {
     <n-collapse-item title="StarNet++" name="4">
       <div class="mx-5 mb-5" v-show="store.starnetPath != ''">
         <n-card title="StarNet++">
-          <n-button @click="starnetInit('rgb')">StarNet RGB</n-button>
-          <n-button @click="starnetInit('mono')">StarNet Mono</n-button>
-          <n-button v-show="mode != '' && !done" @click="killStarnet(mode)">Stop</n-button>
+          <n-button @click="starnetInit()">StarNet++</n-button>
+          <n-button v-show="mode != '' && !done" @click="killStarnet()">Stop</n-button>
           <n-button v-show="done" @click="clear">Done</n-button>
           <div class="my-3">
-            <n-checkbox v-model:checked="stride">Finer Tiles</n-checkbox>
+            <n-checkbox v-model:checked="customStride">Custom Stride</n-checkbox>
+            <n-checkbox v-if="!customStride" v-model:checked="stride">Finer Tiles</n-checkbox>
+            <div class="mt-3">
+              <n-input v-if="customStride" autosize class="w-[150px]" v-model:value="customStrideValue"></n-input>
+            </div>
           </div>
           <span class="whitespace-pre-line">{{ stdOut }}</span>
         </n-card>
