@@ -33,12 +33,12 @@ jobs:
         sudo apt-get install -y webkit2gtk-4.0
     - name: install app dependencies and build it
       run: yarn && yarn build
-    - uses: tauri-apps/tauri-action@dev 
+    - uses: tauri-apps/tauri-action@dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tagName: starnetGUI-v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
-        releaseName: "windowReader v__VERSION__"
+        releaseName: "starnetGUI v__VERSION__"
         releaseBody: "See the assets to download this version and install."
         releaseDraft: true
         prerelease: false
