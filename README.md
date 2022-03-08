@@ -1,6 +1,6 @@
 # StarNet++ GUI
 
-<p>Will update for V2 when the CLI version is out.</p>
+![128x128@2x](https://user-images.githubusercontent.com/58784686/152813914-7747b6c1-faee-462e-b544-0fca4cf1a096.png)
 
 ---
 
@@ -15,15 +15,9 @@ https://youtu.be/OutZCpG2h6E
 
 ---
 
-## TODO
-1. Update Icon on Github README
-2. UI touchups 
-3. Test for application edge cases
-
----
-
 <br>
 
-![image](https://user-images.githubusercontent.com/58784686/151712593-32123dd9-134f-4334-af4f-3c291b5d5c56.png)
+![image](https://user-images.githubusercontent.com/58784686/152814058-b4517d2b-d57b-47fe-ad03-ba57a2c0d5a9.png)
 <br>
-![image](https://user-images.githubusercontent.com/58784686/151712616-5e274ca8-f81d-49c7-8bb5-e9ae81daac23.png)
+![image](https://user-images.githubusercontent.com/58784686/152814149-b1996808-9919-42df-b71b-c6e5d584b3f5.png)
+
