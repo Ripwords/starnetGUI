@@ -3,6 +3,10 @@ on:
   push:
     branches:
       - master
+      
+# env:
+#   TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+#   TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
 jobs:
   publish-tauri:
@@ -17,7 +21,7 @@ jobs:
     - name: setup node
       uses: actions/setup-node@v1
       with:
-        node-version: 14
+        node-version: 16
     - name: install Rust stable
       uses: actions-rs/toolchain@v1
       with:
@@ -29,7 +33,7 @@ jobs:
         sudo apt-get install -y webkit2gtk-4.0
     - name: install app dependencies and build it
       run: yarn && yarn build
-    - uses: tauri-apps/tauri-action@v0
+    - uses: tauri-apps/tauri-action@dev
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
