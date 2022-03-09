@@ -1,31 +1,27 @@
 {
   "name": "starnet-gui",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "scripts": {
-    "dev": "concurrently -k \"vite\" \"tauri dev\"",
-    "build": "vue-tsc --noEmit && vite build && tauri build"
+    "dev": "tauri dev",
+    "build": "tauri build"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.0.0-beta.8",
+    "@tauri-apps/api": "^1.0.0-rc.2",
     "@vueuse/core": "7.6.2",
-    "pinia": "^2.0.3",
-    "vue": "^3.2.16",
-    "vue-router": "^4.0.12"
+    "pinia": "2.0.11",
+    "vue": "3.2.31",
+    "vue-router": "4.0.13"
   },
   "devDependencies": {
-    "@iconify/json": "^1.1.428",
-    "@tauri-apps/cli": "^1.0.0-beta.10",
-    "@vitejs/plugin-vue": "^1.9.3",
-    "concurrently": "^6.3.0",
-    "naive-ui": "^2.24.7",
-    "typescript": "^4.4.3",
+    "@tauri-apps/cli": "^1.0.0-rc.7",
+    "@vitejs/plugin-vue": "2.2.4",
+    "naive-ui": "2.26.3",
+    "typescript": "4.5.5",
     "unplugin-auto-import": "0.6.1",
-    "unplugin-icons": "^0.12.18",
-    "unplugin-vue-components": "^0.17.2",
-    "vite": "^2.6.4",
-    "vite-plugin-windicss": "^1.5.1",
-    "vue-devtools": "^5.1.4",
+    "unplugin-vue-components": "0.17.21",
+    "vite": "2.8.6",
+    "vite-plugin-windicss": "1.8.3",
     "vue-tsc": "^0.3.0",
-    "windicss": "^3.2.1"
+    "windicss": "3.5.1"
   }
 }

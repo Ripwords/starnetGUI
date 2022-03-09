@@ -1,13 +1,13 @@
 {
   "package": {
     "productName": "starnetGUI",
-    "version": "0.5.3"
+    "version": "0.5.4"
   },
   "build": {
     "distDir": "../dist",
     "devPath": "http://localhost:3000",
-    "beforeDevCommand": "",
-    "beforeBuildCommand": ""
+    "beforeDevCommand": "vite",
+    "beforeBuildCommand": "vue-tsc --noEmit && vite build"
   },
   "tauri": {
     "bundle": {
@@ -58,7 +58,25 @@
         "removeFile": true
       },
       "shell": {
-        "all": true
+        "all": true,
+        "scope": [
+          {
+            "name": "taskkill",
+            "cmd": "taskkill",
+            "args": [
+              "/f",
+              "/im",
+              "starnet++.exe"
+            ]
+          },
+          {
+            "name": "killall",
+            "cmd": "killall",
+            "args": [
+              "starnet++"
+            ]
+          }
+        ]
       },
       "dialog": {
         "open": true

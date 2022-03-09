@@ -2,9 +2,8 @@
 import { open } from '@tauri-apps/api/dialog'
 import { platform } from '@tauri-apps/api/os'
 import { dirname } from '@tauri-apps/api/path'
-import { listen } from '@tauri-apps/api/event'
-import { Command } from '@tauri-apps/api/shell'
-import { copyFile, removeFile } from '@tauri-apps/api/fs'
+import { listen, emit } from '@tauri-apps/api/event'
+import { copyFile } from '@tauri-apps/api/fs'
 import { useLoadingBar, useMessage } from 'naive-ui'
 import { mainStore } from '../store'
 
@@ -20,6 +19,8 @@ const done = ref(false)
 const customStride = ref(false)
 const customStrideValue = ref()
 const os = await platform()
+const pid = ref()
+let payloadLength = 0
 
 // StarNet Function
 const starnet = async (
@@ -64,66 +65,22 @@ const starnet = async (
   // Construct Command
   const cwd = os == "windows" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
   const starnetCommand = os == 'windows' ? `${store.starnetPath}\\starnet++` : `${store.starnetPath}/starnet++`
-  const command = new Command(
-    starnetCommand, 
-    [
-      'input.tiff', 
-      outputPath, 
-      customStride.value ? customStrideValue.value : (stride.value ? '128' : '256')
-    ], 
-    {
-      cwd: cwd
-    }
-  )
-      
-  // Get stdout and listen to events
-  command.on('error', () => {
-    loading.error()
-    message.error('Starnet Error')
-    return
-  })
-  command.on('close', () => {
-    if (mode.value != '') {
-      if (stdOut.value.endsWith('errors!\n')) {
-        loading.error()
-        message.error('Starnet Error')
-        return
-      }
-      loading.finish()
-      done.value = true
-      message.success('StarNet finished!')
-    } else {
-      loading.error()
-      message.error('StarNet Aborted!')
-    }
-  })
-  command.stdout.on('data', (line: string) => {
-    (line.endsWith('finished\r') || line.endsWith('finished')) ? stdOut.value += '' : stdOut.value += `${line}\n`
-  })
 
-  // Run StarNet
-  try {
-    loading.start()
-    message.info('Running StarNet...')
-    await command.execute()
-  } catch(e) {
-    loading.error()
-    message.error("StarNet not found!")    
-    await removeFile(`${store.starnetPath}/input.tiff`)
-    return
-  }
+  emit("starnet-command", [
+    starnetCommand, 
+    cwd,
+    outputPath, 
+    customStride.value ? customStrideValue.value : (stride.value ? '128' : '256')
+  ])
 }
 
 // Kills and abort StarNet operation
 const killStarnet = async () => {
-  await clear()
-  let kill
-  if (os == "windows") {
-    kill = new Command('taskkill', ['/f', '/im', `starnet++.exe`])
+  if (os == "win32") {
+    emit("kill-command", ["taskkill", pid.value])
   } else {
-    kill = new Command('killall', [`starnet++`])
+    emit("kill-command", ["killall", pid.value])
   }
-  kill.execute()
 }
 
 // Open directories/files
@@ -155,10 +112,11 @@ const browse = async (path: string) => {
 
 // Clear the output and resets the parameters
 const clear = async () => {
+  emit("remove-input")
   mode.value = ''
   stdOut.value = ''
-  await removeFile(`${store.starnetPath}/input.tiff`)
   done.value = false
+  input.value = []
 }
 
 // Initialize the StarNet operation
@@ -169,12 +127,19 @@ const starnetInit = async () => {
     message.error('No image selected!')
     return
   }
-  for (let i = 0; i < length; i++) {
-    output.value == '' ? output.value = await dirname(arr[i]) : output.value
-    await starnet(arr[i], i, output.value)
-    input.value.shift()
-  }
+
+  output.value == '' ? output.value = await dirname(arr[length - 1]) : output.value
+  await starnet(arr[length - 1], length - 1, output.value)
   output.value = ''
+}
+
+const runStarnetInit = () => {
+  input.value.shift()
+  if (input.value.length > 0) {
+    starnetInit()
+  } else {
+    clear()
+  }
 }
 
 // Tauri Event listeners
@@ -192,6 +157,47 @@ await listen('tauri://file-drop', (file: any) => {
 
 await listen('tauri://close-requested', async () => {
   await killStarnet()
+})
+
+await listen('get-pid', (data: any) => {
+  pid.value = data.payload
+})
+
+await listen('starnet-command-stdout', (data: any) => {
+  if(data.payload.endsWith('finished')) {
+    payloadLength = data.payload.length
+    if(stdOut.value.endsWith("finished")) {
+      stdOut.value = stdOut.value.slice(0, stdOut.value.length - payloadLength - 1)
+    }
+  }
+  stdOut.value += `\n${data.payload}`
+})
+
+await listen('starnet-command-err', () => {
+  loading.error()
+  message.error('Starnet Error')
+})
+
+await listen('starnet-command-init', () => {
+  loading.start()
+  message.info('Running StarNet...')
+})
+
+await listen('starnet-command-terminated', (data: any) => {
+  if(data.payload.code == 0) {
+    loading.finish()
+    message.success('StarNet finished!')
+    done.value = true
+    runStarnetInit()
+  } else if(data.payload.code == 1) {
+    loading.error()
+    message.error('Starnet Aborted!')
+    runStarnetInit()
+  } else {
+    loading.error()
+    message.error('Starnet Error')
+    clear()
+  }
 })
 </script>
 
