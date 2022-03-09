@@ -4,7 +4,7 @@
   <img src="https://user-images.githubusercontent.com/58784686/152813914-7747b6c1-faee-462e-b544-0fca4cf1a096.png" />
 </p>
 <p align="center">
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.5.3/starnetGUI_0.5.3_x64_en-US.msi" target="_blank">
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.5.3/starnetGUI_0.5.3_x64.msi" target="_blank">
     <img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" />
   </a>
   <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.5.3/starnet-gui_0.5.3_amd64.AppImage" target="_blank">
