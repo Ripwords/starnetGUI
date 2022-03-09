@@ -37,7 +37,10 @@ https://youtu.be/OutZCpG2h6E
 
 <br>
 
-
-![image](https://user-images.githubusercontent.com/58784686/152814058-b4517d2b-d57b-47fe-ad03-ba57a2c0d5a9.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/58784686/152814058-b4517d2b-d57b-47fe-ad03-ba57a2c0d5a9.png" />
+</p>
 <br>
-![image](https://user-images.githubusercontent.com/58784686/152814149-b1996808-9919-42df-b71b-c6e5d584b3f5.png)
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/58784686/152814149-b1996808-9919-42df-b71b-c6e5d584b3f5.png" />
+</p>
