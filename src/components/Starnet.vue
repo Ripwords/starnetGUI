@@ -79,7 +79,7 @@ const killStarnet = async () => {
   if (os == "win32") {
     emit("kill-command", ["taskkill", pid.value])
   } else {
-    emit("kill-command", ["killall", pid.value])
+    emit("kill-command", ["kill", pid.value])
   }
 }
 
@@ -194,7 +194,7 @@ await listen('starnet-command-terminated', (data: any) => {
     loading.finish()
     message.success('StarNet finished!')
     runStarnetInit()
-  } else if(data.payload.code == 1) {
+  } else if(data.payload.code == 1 || data.payload.signal == 9) {
     loading.error()
     message.error('Starnet Aborted!')
     runStarnetInit()
