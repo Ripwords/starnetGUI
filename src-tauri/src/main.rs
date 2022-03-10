@@ -31,7 +31,7 @@ fn main() {
           println!("{}", rem_first_and_last(payload[2]));
           if payload[1] == "kill" {
             Command::new("kill")
-              .args(["-s", "9", rem_first_and_last(payload[2])])
+              .args(["-9", rem_first_and_last(payload[2])])
               .spawn()
               .expect("Failed to kill starnet++");
           } else {

@@ -15,11 +15,12 @@ const output = ref('')
 const stdOut = ref('')
 const stride = ref()
 const mode = ref('')
-const done = ref(false)
 const customStride = ref(false)
 const customStrideValue = ref()
 const os = await platform()
 const pid = ref()
+const percentage = ref(0)
+const percentageRef = ref(false)
 let payloadLength = 0
 
 // StarNet Function
@@ -30,7 +31,6 @@ const starnet = async (
 ) => {
   // Clear the output
   stdOut.value = ''
-  done.value = false
 
   // Check for StarNet path
   if (store.starnetPath == '') {
@@ -113,14 +113,15 @@ const browse = async (path: string) => {
 // Clear the output and resets the parameters
 const clear = async () => {
   emit("remove-input")
+  percentage.value = 0
   mode.value = ''
   stdOut.value = ''
-  done.value = false
   input.value = []
 }
 
 // Initialize the StarNet operation
 const starnetInit = async () => {
+  percentageRef.value = true
   const length = input.value.length
   const arr = [...input.value]
   if (arr.length == 0) {
@@ -134,6 +135,9 @@ const starnetInit = async () => {
 }
 
 const runStarnetInit = () => {
+  percentage.value = 0
+  percentageRef.value = false
+
   input.value.shift()
   if (input.value.length > 0) {
     starnetInit()
@@ -164,11 +168,13 @@ await listen('get-pid', (data: any) => {
 })
 
 await listen('starnet-command-stdout', (data: any) => {
-  if(data.payload.endsWith('finished')) {
+  window.scrollTo(0,document.body.scrollHeight)
+  if (data.payload.endsWith('finished')) {
     payloadLength = data.payload.length
     if(stdOut.value.endsWith("finished")) {
       stdOut.value = stdOut.value.slice(0, stdOut.value.length - payloadLength - 1)
     }
+    percentage.value = Number(data.payload.split("%")[0].trim())
   }
   stdOut.value += `\n${data.payload}`
 })
@@ -187,7 +193,6 @@ await listen('starnet-command-terminated', (data: any) => {
   if(data.payload.code == 0) {
     loading.finish()
     message.success('StarNet finished!')
-    done.value = true
     runStarnetInit()
   } else if(data.payload.code == 1) {
     loading.error()
@@ -250,8 +255,8 @@ await listen('starnet-command-terminated', (data: any) => {
       <div class="mx-5 mb-5" v-show="store.starnetPath != ''">
         <n-card title="StarNet++">
           <n-button @click="starnetInit()">StarNet++</n-button>
-          <n-button v-show="mode != '' && !done" @click="killStarnet()">Stop</n-button>
-          <n-button v-show="done" @click="clear">Done</n-button>
+          <n-button v-show="mode != ''" @click="killStarnet()">Stop</n-button>
+          <n-progress v-if="percentageRef" class="absolute right-9 top-7" type="circle" :percentage="percentage" />
           <div class="my-3">
             <n-checkbox v-model:checked="customStride">Custom Stride</n-checkbox>
             <n-checkbox v-if="!customStride" v-model:checked="stride">Finer Tiles</n-checkbox>

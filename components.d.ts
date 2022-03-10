@@ -14,6 +14,7 @@ declare module 'vue' {
     NInput: typeof import('naive-ui')['NInput']
     NLoadingBarProvider: typeof import('naive-ui')['NLoadingBarProvider']
     NMessageProvider: typeof import('naive-ui')['NMessageProvider']
+    NProgress: typeof import('naive-ui')['NProgress']
     Starnet: typeof import('./src/components/Starnet.vue')['default']
   }
 }
