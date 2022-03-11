@@ -1,8 +1,8 @@
 [package]
 name = "starnet-gui"
-version = "0.5.4"
+version = "0.5.5"
 description = "A GUI for Starnet++"
-authors = ["you"]
+authors = ["Ripwords"]
 license = ""
 repository = ""
 default-run = "starnet-gui"

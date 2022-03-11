@@ -23,6 +23,9 @@ const percentage = ref(0)
 const percentageRef = ref(false)
 let payloadLength = 0
 
+// TODO Add vueuse useScroll to improve scroll UX
+// TODO Add remove input file
+
 // StarNet Function
 const starnet = async (
   inputPath: string, 
@@ -57,9 +60,9 @@ const starnet = async (
 
   // Check for Platform and set output path
   if (os == "windows") {
-    counter > 1 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
+    counter > 0 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
   } else {
-    counter > 1 ? outputPath = `${outputPath}/${store.outputFilename}_${counter + 1}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
+    counter > 0 ? outputPath = `${outputPath}/${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
   }
 
   // Construct Command
@@ -128,21 +131,20 @@ const starnetInit = async () => {
     message.error('No image selected!')
     return
   }
-
   output.value == '' ? output.value = await dirname(arr[length - 1]) : output.value
   await starnet(arr[length - 1], length - 1, output.value)
-  output.value = ''
 }
 
 const runStarnetInit = () => {
   percentage.value = 0
   percentageRef.value = false
 
-  input.value.shift()
+  input.value.pop()
   if (input.value.length > 0) {
     starnetInit()
   } else {
     clear()
+    output.value = ''
   }
 }
 
@@ -168,7 +170,6 @@ await listen('get-pid', (data: any) => {
 })
 
 await listen('starnet-command-stdout', (data: any) => {
-  window.scrollTo(0,document.body.scrollHeight)
   if (data.payload.endsWith('finished')) {
     payloadLength = data.payload.length
     if(stdOut.value.endsWith("finished")) {
