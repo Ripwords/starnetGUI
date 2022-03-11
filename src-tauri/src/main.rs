@@ -6,11 +6,6 @@
 use tauri::api::process::{Command, CommandEvent};
 use tauri::Manager;
 
-#[derive(serde::Serialize)]
-struct Payload {
-  message: String,
-}
-
 fn rem_first_and_last(value: &str) -> &str {
   let mut chars = value.chars();
   chars.next();
@@ -51,12 +46,13 @@ fn main() {
           let (mut rx, mut cmd) = Command::new(payload[1])
             .current_dir(payload[3].into())
             .args([
-              "input.tiff",
-              payload[5].into(),
-              payload[7].into(),
+              payload[5],
+              payload[7],
+              payload[9]
             ])
             .spawn()
             .expect("Failed to spawn command");
+            
           handle.emit_all("get-pid", cmd.pid()).expect("Failed to get pid");
           
           let mut i = 0;
@@ -88,9 +84,13 @@ fn main() {
             }
           }
         });
-        
       });
-
+      app.listen_global("remove-input", |event| {
+        tauri::async_runtime::spawn(async move {
+          let payload = event.payload().unwrap().split('"').collect::<Vec<&str>>();
+          std::fs::remove_file(payload[1]).expect("Failed to remove");
+        });
+      });
       Ok(())
     })
     .run(tauri::generate_context!())

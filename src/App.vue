@@ -12,7 +12,7 @@ import { darkTheme } from 'naive-ui'
             <Starnet />
           </template>
           <template #fallback>
-            <div>Loading...</div>
+            <Loading />
           </template>
         </Suspense>
       </n-message-provider>

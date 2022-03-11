@@ -1,30 +1,48 @@
 <script lang="ts" setup>
 import { open } from '@tauri-apps/api/dialog'
 import { platform } from '@tauri-apps/api/os'
-import { dirname } from '@tauri-apps/api/path'
+import { dirname, resolve } from '@tauri-apps/api/path'
 import { listen, emit } from '@tauri-apps/api/event'
 import { copyFile } from '@tauri-apps/api/fs'
 import { useLoadingBar, useMessage } from 'naive-ui'
 import { mainStore } from '../store'
+import { useTimeoutFn } from '@vueuse/core'
 
+// Load Functions
 const store = mainStore()
 const message = useMessage()
 const loading = useLoadingBar()
-const input = ref<string[]>([])
-const output = ref('')
+
+// Define Variables and refs
+const fileInputArray = ref<string[]>([])
+const outputPathRef = ref('')
 const stdOut = ref('')
 const stride = ref()
-const mode = ref('')
+const stopButtonRef = ref(false)
 const customStride = ref(false)
 const customStrideValue = ref()
 const os = await platform()
 const pid = ref()
 const percentage = ref(0)
 const percentageRef = ref(false)
+const stopTimeout = ref<any>()
 let payloadLength = 0
 
-// TODO Add vueuse useScroll to improve scroll UX
-// TODO Add remove input file
+// Finishes loading animation from fallback template
+loading.finish()
+
+// Clear the output and resets the parameters
+// Removes the input file
+const clear = async () => {
+  emit("remove-input", [
+    await resolve(`${store.starnetPath}/${store.tempFile}.tiff`)
+  ])
+  percentage.value = 0
+  stopButtonRef.value = false
+  stdOut.value = ''
+  fileInputArray.value = []
+  percentageRef.value = false
+}
 
 // StarNet Function
 const starnet = async (
@@ -38,47 +56,62 @@ const starnet = async (
   // Check for StarNet path
   if (store.starnetPath == '') {
     message.error('Starnet path is not set')
+    clear()
     return
   }
 
-  // Copy Input Image to StarNet directory
-  try {
-    if (!inputPath.endsWith('input.tiff')) {
-      await copyFile(inputPath, `${store.starnetPath}/input.tiff`)
+  // Copy Input Image to StarNet directory if Input Image is not already in Starnet directory
+  if ((inputPath != `${store.starnetPath}/${store.tempFile}.tiff`) && (inputPath != `${store.starnetPath}\\${store.tempFile}.tiff`)) {
+    try {
+      await copyFile(inputPath, await resolve(`${store.starnetPath}/${store.tempFile}.tiff`))
+    } catch {
+      message.error('Image Path Error')
+      clear()
+      return     
     }
-  } catch(e: any) {
-    message.error('Image Path Error')
-    return
   }
-
-  mode.value = "Running"
 
   // Set the image output path
   if (!outputPath) {
     outputPath = await dirname(inputPath)
   }
 
-  // Check for Platform and set output path
-  if (os == "windows") {
-    counter > 0 ? outputPath = `${outputPath}\\${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}\\${store.outputFilename}.tiff`
-  } else {
-    counter > 0 ? outputPath = `${outputPath}/${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
-  }
+  // Set output path
+  counter > 0 ? outputPath = `${outputPath}/${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
 
   // Construct Command
   const cwd = os == "windows" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
   const starnetCommand = os == 'windows' ? `${store.starnetPath}\\starnet++` : `${store.starnetPath}/starnet++`
 
+  // Emit event for rust backend to run command
   emit("starnet-command", [
     starnetCommand, 
     cwd,
+    `${store.tempFile}.tiff`,
     outputPath, 
     customStride.value ? customStrideValue.value : (stride.value ? '128' : '256')
   ])
+
+  // Show the stop buttons
+  stopButtonRef.value = true
+
+  // Set timeout to check if starnet++ crashed
+  // Crash occurs when starnet path is incorrect
+  const { stop } = useTimeoutFn(() => {
+    if (stdOut.value == "") {
+      loading.error()
+      clear()
+      message.error('Starnet Timed Out')
+      message.error('Check Starnet Directory')
+    }
+  }, 10000)
+  stopTimeout.value = stop
 }
 
 // Kills and abort StarNet operation
+// Stops the crash check timeout
 const killStarnet = async () => {
+  stopTimeout.value()
   if (os == "win32") {
     emit("kill-command", ["taskkill", pid.value])
   } else {
@@ -86,7 +119,7 @@ const killStarnet = async () => {
   }
 }
 
-// Open directories/files
+// Open directories or files
 const browse = async (path: string) => {
   if (path == 'starnet') {
     store.starnetPath = (await open({ directory: true })).toString()
@@ -99,8 +132,8 @@ const browse = async (path: string) => {
     })
     const file = (openDialog == null ? [] : [...openDialog])
     file.forEach((f: string) => {
-      if (input.value.indexOf(f) == -1) {
-        input.value.push(f)
+      if (fileInputArray.value.indexOf(f) == -1) {
+        fileInputArray.value.push(f)
       } else {
         message.error('Image already added!')
       }
@@ -109,51 +142,47 @@ const browse = async (path: string) => {
     const openDialog = await open({
       directory: true
     })
-    output.value = (openDialog == null ? '' : openDialog.toString())
+    outputPathRef.value = (openDialog == null ? '' : openDialog.toString())
   }
-}
-
-// Clear the output and resets the parameters
-const clear = async () => {
-  emit("remove-input")
-  percentage.value = 0
-  mode.value = ''
-  stdOut.value = ''
-  input.value = []
 }
 
 // Initialize the StarNet operation
 const starnetInit = async () => {
   percentageRef.value = true
-  const length = input.value.length
-  const arr = [...input.value]
+  const length = fileInputArray.value.length
+  const arr = [...fileInputArray.value]
   if (arr.length == 0) {
     message.error('No image selected!')
+    clear()
     return
   }
-  output.value == '' ? output.value = await dirname(arr[length - 1]) : output.value
-  await starnet(arr[length - 1], length - 1, output.value)
+  outputPathRef.value == '' ? outputPathRef.value = await dirname(arr[length - 1]) : outputPathRef.value
+  await starnet(arr[length - 1], length - 1, outputPathRef.value)
 }
 
+// Function to re-run the StarNet operation
+// Resets certain parameters
+// Remove the finished input file from array
 const runStarnetInit = () => {
   percentage.value = 0
   percentageRef.value = false
 
-  input.value.pop()
-  if (input.value.length > 0) {
+  fileInputArray.value.pop()
+  if (fileInputArray.value.length > 0) {
     starnetInit()
   } else {
     clear()
-    output.value = ''
+    outputPathRef.value = ''
   }
 }
 
 // Tauri Event listeners
+// Listen from file drop
 await listen('tauri://file-drop', (file: any) => {
   file.payload.forEach((f: any) => {
-    if (input.value.indexOf(f) == -1 && (f.endsWith('.tiff') || f.endsWith('.tif'))) {
-      input.value.push(f)
-    } else if (input.value.indexOf(f) != -1) {
+    if (fileInputArray.value.indexOf(f) == -1 && (f.endsWith('.tiff') || f.endsWith('.tif'))) {
+      fileInputArray.value.push(f)
+    } else if (fileInputArray.value.indexOf(f) != -1) {
       message.error('Image already added!')
     } else if (!(f.endsWith('.tiff') || f.endsWith('.tif'))) {
       message.error('Invalid File Type!')
@@ -161,15 +190,22 @@ await listen('tauri://file-drop', (file: any) => {
   })
 })
 
+// Kills starnet when tauri closes
 await listen('tauri://close-requested', async () => {
   await killStarnet()
 })
 
+// Get PID from backend
 await listen('get-pid', (data: any) => {
   pid.value = data.payload
 })
 
+// Listen for command stdout
 await listen('starnet-command-stdout', (data: any) => {
+  stopTimeout.value()
+  if (store.autoScroll) {
+    window.scrollTo(0,document.body.scrollHeight)
+  }
   if (data.payload.endsWith('finished')) {
     payloadLength = data.payload.length
     if(stdOut.value.endsWith("finished")) {
@@ -180,16 +216,19 @@ await listen('starnet-command-stdout', (data: any) => {
   stdOut.value += `\n${data.payload}`
 })
 
+// Listen for command errors
 await listen('starnet-command-err', () => {
   loading.error()
   message.error('Starnet Error')
 })
 
+// Listen for command initialization
 await listen('starnet-command-init', () => {
   loading.start()
   message.info('Running StarNet...')
 })
 
+// Listen for command termination
 await listen('starnet-command-terminated', (data: any) => {
   if(data.payload.code == 0) {
     loading.finish()
@@ -208,13 +247,30 @@ await listen('starnet-command-terminated', (data: any) => {
 </script>
 
 <template>
-  <n-collapse :default-expanded-names="['2', '4']">
+  <n-collapse :default-expanded-names="store.starnetPath == '' ? ['1'] : ['2', '4']">
     <div class="mt-4">
-      <n-collapse-item title="StarNet Directory" name="1">
+      <n-collapse-item title="GUI Settings" name="1">
         <div class="mx-5 mb-5">
-          <n-card title="StarNet Directory">
+          <n-card title="Starnet Directory">
             <n-button @click="browse('starnet')">Browse</n-button>
             <n-card v-if="store.starnetPath != ''">{{ store.starnetPath }}</n-card>
+          </n-card>
+        </div>
+        <div class="mx-5 mb-5">
+          <n-card title="Starnet Temporary file name">
+            <n-input v-model:value="store.tempFile">
+              <template #suffix>
+                .tiff
+              </template>
+            </n-input>
+            <template #footer>
+              File will be deleted when command terminates
+            </template>
+          </n-card>
+        </div>
+        <div class="mx-5 mb-5">
+          <n-card title="Auto Scroll">
+            <n-checkbox v-model:checked="store.autoScroll">Auto scorll</n-checkbox>
           </n-card>
         </div>
       </n-collapse-item>
@@ -223,13 +279,13 @@ await listen('starnet-command-terminated', (data: any) => {
       <div class="mx-5 mb-5" v-show="store.starnetPath != ''">
         <n-card title="Input Image">
           <n-button @click="browse('input')">Browse</n-button>
-          <div v-show="input.length != 0">
-            <n-card class="break-words" v-for="img in input" :key="img">
+          <div v-show="fileInputArray.length != 0">
+            <n-card class="break-words" v-for="img in fileInputArray" :key="img">
               <div class="flex justify-between">
                 <div class="max-w-[90%] relative">
                   {{ img }}
                 </div>
-                <button @click="input = input.filter(e => e !== img)">x</button>
+                <button @click="fileInputArray = fileInputArray.filter(e => e !== img)">x</button>
               </div>
             </n-card>
           </div>
@@ -240,7 +296,7 @@ await listen('starnet-command-terminated', (data: any) => {
       <div class="mx-5 mb-5" v-show="store.starnetPath != ''">
         <n-card title="Output">
           <n-button @click="browse('output')">Browse</n-button>
-          <n-card v-if="output != ''">{{ output }}</n-card>
+          <n-card v-if="outputPathRef != ''">{{ outputPathRef }}</n-card>
           <n-card v-else>Defaults to input directory if not provided</n-card>
           <br>
           <br>
@@ -256,7 +312,7 @@ await listen('starnet-command-terminated', (data: any) => {
       <div class="mx-5 mb-5" v-show="store.starnetPath != ''">
         <n-card title="StarNet++">
           <n-button @click="starnetInit()">StarNet++</n-button>
-          <n-button v-show="mode != ''" @click="killStarnet()">Stop</n-button>
+          <n-button v-show="stopButtonRef" @click="killStarnet()">Stop</n-button>
           <n-progress v-if="percentageRef" class="absolute right-9 top-7" type="circle" :percentage="percentage" />
           <div class="my-3">
             <n-checkbox v-model:checked="customStride">Custom Stride</n-checkbox>
