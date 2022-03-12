@@ -1,6 +1,6 @@
 {
   "name": "starnet-gui",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build"
