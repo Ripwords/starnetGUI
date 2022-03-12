@@ -54,29 +54,10 @@
     },
     "allowlist": {
       "fs": {
-        "copyFile": true,
-        "removeFile": true
+        "copyFile": true
       },
       "shell": {
-        "all": true,
-        "scope": [
-          {
-            "name": "taskkill",
-            "cmd": "taskkill",
-            "args": [
-              "/f",
-              "/im",
-              "starnet++.exe"
-            ]
-          },
-          {
-            "name": "killall",
-            "cmd": "killall",
-            "args": [
-              "starnet++"
-            ]
-          }
-        ]
+        "all": true
       },
       "dialog": {
         "open": true
@@ -86,6 +67,9 @@
       },
       "path": {
         "all": true
+      },
+      "window": {
+        "setTitle": true
       }
     },
     "windows": [

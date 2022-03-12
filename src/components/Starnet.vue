@@ -4,6 +4,7 @@ import { platform } from '@tauri-apps/api/os'
 import { dirname, resolve } from '@tauri-apps/api/path'
 import { listen, emit } from '@tauri-apps/api/event'
 import { copyFile } from '@tauri-apps/api/fs'
+import { appWindow } from '@tauri-apps/api/window'
 import { useLoadingBar, useMessage } from 'naive-ui'
 import { mainStore } from '../store'
 import { useTimeoutFn } from '@vueuse/core'
@@ -12,6 +13,7 @@ import { useTimeoutFn } from '@vueuse/core'
 const store = mainStore()
 const message = useMessage()
 const loading = useLoadingBar()
+await appWindow.setTitle(`Starnet++ v${__APP_VERSION__}`)
 
 // Define Variables and refs
 const fileInputArray = ref<string[]>([])
@@ -104,7 +106,7 @@ const starnet = async (
       message.error('Starnet Timed Out')
       message.error('Check Starnet Directory')
     }
-  }, 10000)
+  }, store.timeout)
   stopTimeout.value = stop
 }
 
@@ -270,7 +272,16 @@ await listen('starnet-command-terminated', (data: any) => {
         </div>
         <div class="mx-5 mb-5">
           <n-card title="Auto Scroll">
-            <n-checkbox v-model:checked="store.autoScroll">Auto scorll</n-checkbox>
+            <n-checkbox v-model:checked="store.autoScroll">Auto scroll</n-checkbox>
+          </n-card>
+        </div>
+        <div class="mx-5 mb-5">
+          <n-card title="Timeout">
+            <n-input v-model:value="store.timeout">
+              <template #suffix>
+                ms
+              </template>
+            </n-input>
           </n-card>
         </div>
       </n-collapse-item>
