@@ -15,7 +15,7 @@ const message = useMessage()
 const loading = useLoadingBar()
 await appWindow.setTitle(`Starnet++ v${__APP_VERSION__}`)
 
-// Define Variables and refs
+// Define Variables
 const fileInputArray = ref<string[]>([])
 const outputPathRef = ref('')
 const stdOut = ref('')
@@ -33,8 +33,7 @@ let payloadLength = 0
 // Finishes loading animation from fallback template
 loading.finish()
 
-// Clear the output and resets the parameters
-// Removes the input file
+// Clearing the output and resets the parameters. It also removes the input file.
 const clear = async () => {
   emit("remove-input", [
     await resolve(`${store.starnetPath}/${store.tempFile}.tiff`)
@@ -55,14 +54,16 @@ const starnet = async (
   // Clear the output
   stdOut.value = ''
 
-  // Check for StarNet path
+  // Checking if the starnet path is set. If it is not, it will display an error message and clear the
+  // output.
   if (store.starnetPath == '') {
     message.error('Starnet path is not set')
     clear()
     return
   }
 
-  // Copy Input Image to StarNet directory if Input Image is not already in Starnet directory
+  // Checking if the input image is in the starnet directory. If it is not, it will copy the image to
+  // the starnet directory.
   if ((inputPath != `${store.starnetPath}/${store.tempFile}.tiff`) && (inputPath != `${store.starnetPath}\\${store.tempFile}.tiff`)) {
     try {
       await copyFile(inputPath, await resolve(`${store.starnetPath}/${store.tempFile}.tiff`))
@@ -94,8 +95,9 @@ const starnet = async (
     customStride.value ? customStrideValue.value : (stride.value ? '128' : '256')
   ])
 
-  // Show the stop buttons
+  // Show the stop button and the progress circle
   stopButtonRef.value = true
+  percentageRef.value = true
 
   // Set timeout to check if starnet++ crashed
   // Crash occurs when starnet path is incorrect
@@ -124,7 +126,7 @@ const killStarnet = async () => {
 // Open directories or files
 const browse = async (path: string) => {
   if (path == 'starnet') {
-    store.starnetPath = (await open({ directory: true })).toString()
+    store.starnetPath = (await open({ directory: true }) ?? '').toString()
   } else if (path == 'input'){
     const openDialog = await open({
       multiple: true,
@@ -150,7 +152,6 @@ const browse = async (path: string) => {
 
 // Initialize the StarNet operation
 const starnetInit = async () => {
-  percentageRef.value = true
   const length = fileInputArray.value.length
   const arr = [...fileInputArray.value]
   if (arr.length == 0) {
@@ -208,9 +209,9 @@ await listen('starnet-command-stdout', (data: any) => {
   if (store.autoScroll) {
     window.scrollTo(0,document.body.scrollHeight)
   }
-  if (data.payload.endsWith('finished')) {
+  if (data.payload.trim().endsWith('finished')) {
     payloadLength = data.payload.length
-    if(stdOut.value.endsWith("finished")) {
+    if(stdOut.value.trim().endsWith("finished")) {
       stdOut.value = stdOut.value.slice(0, stdOut.value.length - payloadLength - 1)
     }
     percentage.value = Number(data.payload.split("%")[0].trim())
@@ -249,9 +250,9 @@ await listen('starnet-command-terminated', (data: any) => {
 </script>
 
 <template>
-  <n-collapse :default-expanded-names="store.starnetPath == '' ? ['1'] : ['2', '4']">
+  <n-collapse class="px-1" :default-expanded-names="store.starnetPath == '' ? ['1'] : ['2', '4']">
     <div class="mt-4">
-      <n-collapse-item title="GUI Settings" name="1">
+      <n-collapse-item title="Settings" name="1">
         <div class="mx-5 mb-5">
           <n-card title="Starnet Directory">
             <n-button @click="browse('starnet')">Browse</n-button>
@@ -272,7 +273,14 @@ await listen('starnet-command-terminated', (data: any) => {
         </div>
         <div class="mx-5 mb-5">
           <n-card title="Auto Scroll">
-            <n-checkbox v-model:checked="store.autoScroll">Auto scroll</n-checkbox>
+            <n-tooltip placement="bottom-end" trigger="hover">
+              <template #trigger>
+                <n-checkbox v-model:checked="store.autoScroll">
+                  Auto Scroll
+                </n-checkbox>
+              </template>
+                Automatically scrolls to the bottom when starnet is running
+            </n-tooltip>
           </n-card>
         </div>
         <div class="mx-5 mb-5">
@@ -310,7 +318,6 @@ await listen('starnet-command-terminated', (data: any) => {
           <n-card v-if="outputPathRef != ''">{{ outputPathRef }}</n-card>
           <n-card v-else>Defaults to input directory if not provided</n-card>
           <br>
-          <br>
           <n-input placeholder="starless" v-model:value="store.outputFilename" spellcheck="false">
             <template #suffix>
               .tiff
@@ -325,14 +332,16 @@ await listen('starnet-command-terminated', (data: any) => {
           <n-button @click="starnetInit()">StarNet++</n-button>
           <n-button v-show="stopButtonRef" @click="killStarnet()">Stop</n-button>
           <n-progress v-if="percentageRef" class="absolute right-9 top-7" type="circle" :percentage="percentage" />
-          <div class="my-3">
+          <div class="my-3" v-if="!percentageRef">
             <n-checkbox v-model:checked="customStride">Custom Stride</n-checkbox>
             <n-checkbox v-if="!customStride" v-model:checked="stride">Finer Tiles</n-checkbox>
             <div class="mt-3">
-              <n-input v-if="customStride" autosize class="w-[150px]" v-model:value="customStrideValue"></n-input>
+              <n-input v-if="customStride" autosize class="w-[150px]" v-model:value="customStrideValue" placeholder="Stride Number"></n-input>
             </div>
           </div>
-          <span class="whitespace-pre-line">{{ stdOut }}</span>
+          <div class="mt-1">
+            <span class="whitespace-pre-line">{{ stdOut }}</span>
+          </div>
         </n-card>
       </div>
     </n-collapse-item>
