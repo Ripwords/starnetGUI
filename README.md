@@ -4,16 +4,16 @@
   <img src="https://user-images.githubusercontent.com/58784686/152813914-7747b6c1-faee-462e-b544-0fca4cf1a096.png" />
 </p>
 <p align="center">
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.6.0/starnetGUI_0.6.0_x64_en-US.msi" target="_blank">
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.6.1/starnetGUI_0.6.1_x64_en-US.msi" target="_blank">
     <img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" />
   </a>
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.6.0/starnet-gui_0.6.0_amd64.AppImage" target="_blank">
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.6.1/starnet-gui_0.6.1_amd64.AppImage" target="_blank">
     <img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" />
   </a>
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.6.0/starnet-gui_0.6.0_amd64.deb" target="_blank">
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.6.1/starnet-gui_0.6.1_amd64.deb" target="_blank">
     <img src="https://img.shields.io/badge/Debian-D70A53?style=for-the-badge&logo=debian&logoColor=white" />
   </a>
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.6.0/starnetGUI_0.6.0_x64.dmg" target="_blank">
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/starnetGUI-v0.6.1/starnetGUI_0.6.1_x64.dmg" target="_blank">
     <img src="https://img.shields.io/badge/mac%20os-000000?style=for-the-badge&logo=macos&logoColor=F0F0F0" />
   </a>
 </p>
