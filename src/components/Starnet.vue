@@ -339,6 +339,7 @@ await listen('starnet-command-terminated', (data: any) => {
               <n-input v-if="customStride" autosize class="w-[150px]" v-model:value="customStrideValue" placeholder="Stride Number"></n-input>
             </div>
           </div>
+          <div v-else-if="percentageRef && stdOut == ''" class="my-12"></div>
           <div class="mt-1">
             <span class="whitespace-pre-line">{{ stdOut }}</span>
           </div>
