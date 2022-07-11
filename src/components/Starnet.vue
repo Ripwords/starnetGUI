@@ -29,7 +29,7 @@ const percentage = ref(0)
 const percentageRef = ref(false)
 const stopTimeout = ref<any>()
 let payloadLength = 0
-
+console.log(os)
 // Finishes loading animation from fallback template
 loading.finish()
 
@@ -83,8 +83,8 @@ const starnet = async (
   counter > 0 ? outputPath = `${outputPath}/${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
 
   // Construct Command
-  const cwd = os == "windows" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
-  const starnetCommand = os == 'windows' ? `${store.starnetPath}\\starnet++` : `${store.starnetPath}/starnet++`
+  const cwd = os == "win32" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
+  const starnetCommand = os == 'win32' ? `${store.starnetPath}\\starnet++` : `${store.starnetPath}/starnet++`
 
   // Emit event for rust backend to run command
   emit("starnet-command", [
