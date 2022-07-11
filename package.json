@@ -1,18 +1,18 @@
 {
   "name": "starnet-gui",
-  "version": "0.6.2",
+  "version": "1.0.0",
   "scripts": {
     "dev": "tauri dev",
     "build": "tauri build"
   },
   "dependencies": {
-    "@tauri-apps/api": "^1.0.0-rc.6",
+    "@tauri-apps/api": "^1.0.2",
     "@vueuse/core": "8.6.0",
     "pinia": "2.0.14",
     "vue": "3.2.36"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.0.0-rc.13",
+    "@tauri-apps/cli": "^1.0.3",
     "@vitejs/plugin-vue": "2.3.3",
     "naive-ui": "2.29.1",
     "typescript": "4.7.3",
