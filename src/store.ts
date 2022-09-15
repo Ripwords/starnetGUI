@@ -7,6 +7,7 @@ export const mainStore = defineStore('mainStore', {
     outputFilename: useStorage('outputFilename', 'starless'),
     tempFile: useStorage('tempFile', "starnetTempInput"),
     autoScroll: useStorage('autoScroll', false),
+    originalFilename: useStorage('originalFilename', true),
     timeout: useStorage('timeout', 10000)
   })
 })

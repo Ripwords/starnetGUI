@@ -16,6 +16,7 @@ const loading = useLoadingBar()
 await appWindow.setTitle(`Starnet++ v${__APP_VERSION__}`)
 
 // Define Variables
+const inputFilename = ref('')
 const fileInputArray = ref<string[]>([])
 const outputPathRef = ref('')
 const stdOut = ref('')
@@ -43,14 +44,21 @@ const clear = async () => {
   stdOut.value = ''
   fileInputArray.value = []
   percentageRef.value = false
+  store.outputFilename = store.originalFilename ? "starless" : store.outputFilename
 }
 
 // StarNet Function
 const starnet = async (
-  inputPath: string, 
-  counter: number, 
+  inputPath: string,
+  counter: number,
   outputPath?: string
 ) => {
+  console.log(inputPath)
+  // Extract filename from filepath for both windows and unix based systems
+  const filename = inputPath.split(/(\\|\/)/g).pop()
+  const filenameNoExt = filename?.split('.').slice(0, -1).join('.')
+  inputFilename.value = filenameNoExt ?? "starless"
+
   // Clear the output
   stdOut.value = ''
 
@@ -70,7 +78,7 @@ const starnet = async (
     } catch {
       message.error('Image Path Error')
       clear()
-      return     
+      return
     }
   }
 
@@ -80,6 +88,9 @@ const starnet = async (
   }
 
   // Set output path
+  if (store.originalFilename) {
+    store.outputFilename = `${inputFilename.value}_starless`
+  }
   counter > 0 ? outputPath = `${outputPath}/${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
 
   // Construct Command
@@ -88,10 +99,10 @@ const starnet = async (
 
   // Emit event for rust backend to run command
   emit("starnet-command", [
-    starnetCommand, 
+    starnetCommand,
     cwd,
     `${store.tempFile}.tiff`,
-    outputPath, 
+    outputPath,
     customStride.value ? customStrideValue.value : (stride.value ? '128' : '256')
   ])
 
@@ -127,7 +138,7 @@ const killStarnet = async () => {
 const browse = async (path: string) => {
   if (path == 'starnet') {
     store.starnetPath = (await open({ directory: true }) ?? '').toString()
-  } else if (path == 'input'){
+  } else if (path == 'input') {
     const openDialog = await open({
       multiple: true,
       filters: [
@@ -207,11 +218,11 @@ await listen('get-pid', (data: any) => {
 await listen('starnet-command-stdout', (data: any) => {
   stopTimeout.value()
   if (store.autoScroll) {
-    window.scrollTo(0,document.body.scrollHeight)
+    window.scrollTo(0, document.body.scrollHeight)
   }
   if (data.payload.trim().endsWith('finished')) {
     payloadLength = data.payload.length
-    if(stdOut.value.trim().endsWith("finished")) {
+    if (stdOut.value.trim().endsWith("finished")) {
       stdOut.value = stdOut.value.slice(0, stdOut.value.length - payloadLength - 1)
     }
     percentage.value = Number(data.payload.split("%")[0].trim())
@@ -233,11 +244,11 @@ await listen('starnet-command-init', () => {
 
 // Listen for command termination
 await listen('starnet-command-terminated', (data: any) => {
-  if(data.payload.code == 0) {
+  if (data.payload.code == 0) {
     loading.finish()
     message.success('StarNet finished!')
     runStarnetInit()
-  } else if(data.payload.code == 1 || data.payload.signal == 9) {
+  } else if (data.payload.code == 1 || data.payload.signal == 9) {
     loading.error()
     message.error('Starnet Aborted!')
     runStarnetInit()
@@ -279,7 +290,7 @@ await listen('starnet-command-terminated', (data: any) => {
                   Auto Scroll
                 </n-checkbox>
               </template>
-                Automatically scrolls to the bottom when starnet is running
+              Automatically scrolls to the bottom when starnet is running
             </n-tooltip>
           </n-card>
         </div>
@@ -318,7 +329,18 @@ await listen('starnet-command-terminated', (data: any) => {
           <n-card v-if="outputPathRef != ''">{{ outputPathRef }}</n-card>
           <n-card v-else>Defaults to input directory if not provided</n-card>
           <br>
-          <n-input placeholder="starless" v-model:value="store.outputFilename" spellcheck="false">
+          <n-tooltip placement="right-end" trigger="hover">
+            <template #trigger>
+              <n-checkbox v-model:checked="store.originalFilename">
+                Original filename
+              </n-checkbox>
+            </template>
+            XXX_starless.tiff
+          </n-tooltip>
+          <br>
+          <br>
+          <n-input :disabled="store.originalFilename" placeholder="starless" v-model:value="store.outputFilename"
+            spellcheck="false">
             <template #suffix>
               .tiff
             </template>
@@ -336,7 +358,8 @@ await listen('starnet-command-terminated', (data: any) => {
             <n-checkbox v-model:checked="customStride">Custom Stride</n-checkbox>
             <n-checkbox v-if="!customStride" v-model:checked="stride">Finer Tiles</n-checkbox>
             <div class="mt-3">
-              <n-input v-if="customStride" autosize class="w-[150px]" v-model:value="customStrideValue" placeholder="Stride Number"></n-input>
+              <n-input v-if="customStride" autosize class="w-[150px]" v-model:value="customStrideValue"
+                placeholder="Stride Number"></n-input>
             </div>
           </div>
           <div v-else-if="percentageRef && stdOut == ''" class="my-12"></div>
