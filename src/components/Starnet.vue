@@ -90,8 +90,10 @@ const starnet = async (
   // Set output path
   if (store.originalFilename) {
     store.outputFilename = `${inputFilename.value}_starless`
+    outputPath = `${outputPath}/${store.outputFilename}.tiff`
+  } else {
+    counter > 0 ? outputPath = `${outputPath}/${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
   }
-  counter > 0 ? outputPath = `${outputPath}/${store.outputFilename}_${counter}.tiff` : outputPath = `${outputPath}/${store.outputFilename}.tiff`
 
   // Construct Command
   const cwd = os == "win32" ? `${store.starnetPath}\\` : `${store.starnetPath}/`
