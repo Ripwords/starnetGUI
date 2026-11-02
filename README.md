@@ -7,10 +7,10 @@
 A desktop interface for the [StarNet2](https://starnetastro.com/cli-tools/starnet/) star removal command-line tool, on macOS, Windows and Linux.
 
 <p align="center">
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/v2.0.0/starnetGUI_2.0.0_aarch64.dmg"><img src="https://img.shields.io/badge/Apple%20Silicon-3F454D?style=for-the-badge&logo=apple&logoColor=white" alt="Download for Mac (Apple Silicon)" /></a>
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/v2.0.0/starnetGUI_2.0.0_x64.dmg"><img src="https://img.shields.io/badge/Intel-3F454D?style=for-the-badge&logo=apple&logoColor=white" alt="Download for Mac (Intel)" /></a>
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/v2.0.0/starnetGUI_2.0.0_x64-setup.exe"><img src="https://img.shields.io/badge/Windows-3F454D?style=for-the-badge&logo=windows11&logoColor=white" alt="Download for Windows" /></a>
-  <a href="https://github.com/Ripwords/starnetGUI/releases/download/v2.0.0/starnetGUI_2.0.0_amd64.AppImage"><img src="https://img.shields.io/badge/Linux-3F454D?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux" /></a>
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/v2.0.0/starnetGUI_2.0.0_aarch64.dmg"><img src="https://img.shields.io/badge/Apple%20Silicon-000000?style=for-the-badge&logo=apple&logoColor=F0F0F0" alt="Download for Mac (Apple Silicon)" /></a>
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/v2.0.0/starnetGUI_2.0.0_x64.dmg"><img src="https://img.shields.io/badge/Intel-000000?style=for-the-badge&logo=apple&logoColor=F0F0F0" alt="Download for Mac (Intel)" /></a>
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/v2.0.0/starnetGUI_2.0.0_x64-setup.exe"><img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0wIDMuNCA5LjggMnY5LjVIMHpNMTAuOSAxLjkgMjQgMHYxMS41SDEwLjl6TTAgMTIuNWg5LjhWMjJMMCAyMC42ek0xMC45IDEyLjVIMjRWMjRsLTEzLjEtMS45eiIvPjwvc3ZnPg%3D%3D" alt="Download for Windows" /></a>
+  <a href="https://github.com/Ripwords/starnetGUI/releases/download/v2.0.0/starnetGUI_2.0.0_amd64.AppImage"><img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Download for Linux" /></a>
 </p>
 
 <p align="center">
