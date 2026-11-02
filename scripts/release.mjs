@@ -39,9 +39,9 @@ setVersion(conf, /("version":\s*)"[^"]+"/, `$1"${version}"`);
 setVersion(cargo, /^version = "[^"]+"$/m, `version = "${version}"`);
 setVersion(lock, /(name = "starnet-gui"\nversion = )"[^"]+"/, `$1"${version}"`);
 
-// Point the README's four download buttons at this version's assets. The tag
+// Point the README's download buttons at this version's assets. The tag
 // and the filename both carry the version, so they have to move together. A
-// silent miss here — a renamed bundle, an edited README — would ship four dead
+// silent miss here — a renamed bundle, an edited README — would ship dead
 // buttons on the repo homepage, so assert the rewrite actually landed.
 const readme = "README.md";
 const stamped = readFileSync(readme, "utf8")
@@ -50,9 +50,9 @@ const stamped = readFileSync(readme, "utf8")
 const stampedLinks = stamped.match(
   new RegExp(`/releases/download/v${version}/starnetGUI_${version}_`, "g"),
 );
-if (stampedLinks?.length !== 4) {
+if (stampedLinks?.length !== 5) {
   throw new Error(
-    `README.md: expected 4 download links for v${version}, rewrote ${stampedLinks?.length ?? 0}. ` +
+    `README.md: expected 5 download links for v${version}, rewrote ${stampedLinks?.length ?? 0}. ` +
       `Check the bundle filenames in the release workflow against the links in README.md.`,
   );
 }
