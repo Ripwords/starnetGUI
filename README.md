@@ -63,13 +63,26 @@ Images must be at least 512 x 512 pixels, or 256 x 256 with **Upsample** on.
 The app is not code-signed with a paid developer identity, so each system shows a warning the first time.
 
 <details>
-<summary><strong>macOS</strong>: "starnetGUI is damaged and can't be opened"</summary>
+<summary><strong>macOS</strong>: "Apple could not verify starnetGUI is free of malware" or "starnetGUI is damaged and can't be opened"</summary>
 
-The app is signed ad-hoc but not notarized, so Gatekeeper quarantines it on download. Drag it to **Applications**, then run:
+The app is signed ad-hoc but not notarized, so macOS blocks it the first time. You only need to do this once for each install.
+
+First, drag starnetGUI to **Applications**. Then use either fix.
+
+**Using System Settings** (not available for the "damaged" message):
+
+1. Try to open starnetGUI, and select **Done** on the warning.
+2. Open **System Settings** > **Privacy & Security**.
+3. Scroll down to **Security**, and select **Open Anyway** next to the starnetGUI message.
+4. Select **Open Anyway** again, and enter your password.
+
+**Using Terminal** (works for both messages):
 
 ```bash
 xattr -cr /Applications/starnetGUI.app
 ```
+
+Then open starnetGUI as usual.
 
 </details>
 
