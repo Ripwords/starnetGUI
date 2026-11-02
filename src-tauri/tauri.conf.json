@@ -1,87 +1,53 @@
 {
-  "package": {
-    "productName": "starnetGUI",
-    "version": "1.1.1"
-  },
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "starnetGUI",
+  "version": "2.0.0",
+  "identifier": "com.ripwords.starnetgui",
   "build": {
-    "distDir": "../dist",
-    "devPath": "http://localhost:5173",
-    "beforeDevCommand": "vite",
-    "beforeBuildCommand": "vue-tsc --noEmit && vite build"
+    "frontendDist": "../.output/public",
+    "devUrl": "http://localhost:3000",
+    "beforeDevCommand": "bun run ui:dev",
+    "beforeBuildCommand": "bun run generate"
   },
-  "tauri": {
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.ripwords.starnetgui",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ],
-      "resources": [],
-      "externalBin": [],
-      "copyright": "",
-      "category": "Utility",
-      "shortDescription": "GUI for Starnet++",
-      "longDescription": "A graphical user interface for Starnet++",
-      "deb": {
-        "depends": []
-      },
-      "macOS": {
-        "frameworks": [],
-        "minimumSystemVersion": "",
-        "exceptionDomain": "",
-        "signingIdentity": null,
-        "entitlements": null
-      },
-      "windows": {
-        "certificateThumbprint": null,
-        "digestAlgorithm": "sha256",
-        "timestampUrl": ""
-      }
-    },
-    "updater": {
-      "active": true,
-      "endpoints": [
-        "https://gist.github.com/Ripwords/96449ceca853b183ddabdffef3bcacd2/raw"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDdBNDY2RkY0MThBNDA4RjcKUldUM0NLUVk5RzlHZXM4cXJqWW1ZZmw2VXdid2pFT0FGR05qaDR2Qi8vK01tL3k1Y1dkKzRmaWcK"
-    },
-    "allowlist": {
-      "fs": {
-        "copyFile": true
-      },
-      "shell": {
-        "all": true
-      },
-      "dialog": {
-        "open": true
-      },
-      "os": {
-        "all": true
-      },
-      "path": {
-        "all": true
-      },
-      "window": {
-        "setTitle": true
-      }
-    },
+  "app": {
     "windows": [
       {
-        "title": "StarNet++",
-        "width": 500,
-        "height": 600,
-        "resizable": true,
-        "fullscreen": false,
-        "fileDropEnabled": true
+        "title": "StarNet GUI",
+        "width": 880,
+        "height": 620,
+        "minWidth": 680,
+        "minHeight": 540,
+        "resizable": true
       }
     ],
     "security": {
-      "csp": "default-src blob: data: filesystem: ws: wss: http: https: tauri: 'unsafe-eval' 'unsafe-inline' 'self' img-src: 'self'"
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "createUpdaterArtifacts": true,
+    "category": "Utility",
+    "shortDescription": "GUI for StarNet2",
+    "longDescription": "A graphical interface for the StarNet2 star removal command-line tool",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "signingIdentity": "-"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/Ripwords/starnetGUI/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVFMDMzNzQxREFCREJFNEYKUldSUHZyM2FRVGNEWHBPOVliMzRMOVMrQ3FHTkQ0QmUxYkVsUEdtMVAwaUo2YWtsd2hsYytWREUK"
     }
   }
 }
