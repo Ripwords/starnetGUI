@@ -1,5 +1,11 @@
 node_modules
-.DS_Store
+.nuxt
+.output
+.data
 dist
-dist-ssr
-*.local
+.DS_Store
+*.log
+*.key
+.env
+.env.*
+.hallmark

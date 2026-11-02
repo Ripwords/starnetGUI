@@ -1,0 +1,20 @@
+/* Hallmark · genre: modern-minimal · macrostructure: Workbench (app pane + options rail) · tone: utilitarian · anchor hue: none (monochrome) · pre-emit critique: P4 H5 E4 S4 R5 V4 */
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+:root {
+  --ui-radius: 0.5rem;
+}
+
+.dark {
+  --ui-primary: white;
+  --ui-bg: black;
+  --ui-bg-muted: var(--ui-color-neutral-950);
+}
+
+html,
+body {
+  overflow: hidden;
+  user-select: none;
+  cursor: default;
+}
